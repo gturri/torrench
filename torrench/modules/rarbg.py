@@ -37,12 +37,15 @@ class RarBg(Config):
         self.headers = [
                 'CATEG', 'NAME', 'INDEX', 'SIZE', 'S/L', 'DATE'
                 ]
+        self.session = requests.Session()
+        self.session.headers.update({'User-Agent': 'My User Agent 1.0'})
+        
 
     def get_token(self):
         """To generate token."""
         self.logger.debug("Getting token")
-        get_token = "get_token=get_token"
-        raw = requests.get(self.proxy+get_token).json()
+        get_token = "app_id=torrenchi&get_token=get_token"
+        raw = self.session.get(self.proxy+get_token).json()
         self.token = raw['token']
         self.logger.debug("Token generated - {}".format(self.token))
 
@@ -55,7 +58,7 @@ class RarBg(Config):
             params = "mode=search&app_id=torrench&sort=seeders&limit=100&format=json_extended&search_string={}&token={}".format(self.title, self.token)
             start_time = time.time()
             self.logger.debug("Fetching results")
-            self.raw = requests.get(self.proxy+params).json()
+            self.raw = self.session.get(self.proxy+params).json()
             if 'error' in self.raw:
                 return
             self.total_fetch_time = time.time() - start_time
@@ -95,6 +98,7 @@ class RarBg(Config):
 def main(title):
     """Execution begins here."""
     print("\n[RarBg]\n")
+    print("title="+title)
     rbg = RarBg(title)
     rbg.get_token()
     time.sleep(0.75)
